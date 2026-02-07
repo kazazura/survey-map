@@ -34,10 +34,21 @@ backgroundImage.onerror = function () {
 
 function getColor(intensity) {
   const capped = Math.min(intensity, maxIntensity);
-  const r = Math.floor((capped / maxIntensity) * 255);
-  const g = Math.floor(255 - (capped / maxIntensity) * 255);
-  const b = 0;
-  const alpha = Math.min(capped / maxIntensity * 0.8, 0.8);
+  let r, g, b;
+  if (capped <= maxIntensity / 2) {
+    // Green to yellow
+    const t = capped / (maxIntensity / 2);
+    r = Math.floor(t * 255);
+    g = 255;
+    b = 0;
+  } else {
+    // Yellow to red
+    const t = (capped - maxIntensity / 2) / (maxIntensity / 2);
+    r = 255;
+    g = Math.floor(255 * (1 - t));
+    b = 0;
+  }
+  const alpha = Math.min(capped / maxIntensity * 1.5, 1.0);
   return `rgba(${r},${g},${b},${alpha})`;
 }
 
