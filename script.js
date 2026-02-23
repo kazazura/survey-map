@@ -23,7 +23,9 @@ let intensityGrid = Array.from({ length: gridHeight }, () => Array(gridWidth).fi
 
 const maxIntensity = 20; // Cap for color scaling/Number of clicks
 const heatRadius = 16; // Radius in grid cells (pixels when gridSize=1)
-const pointLabelMergeRadius = 50; // Merge nearby point labels into one summary / Original: 22
+const pointLabelMergeRadius = 22; // Merge nearby point labels into one summary / Original: 22
+const redRegionIntensityThreshold = maxIntensity * 0.72;
+const redRegionMergeRadius = 48;
 const dimmedImageOpacity = 0.35;
 
 const backgroundImage = new Image();
@@ -145,11 +147,29 @@ function addPointClick(x, y) {
   pointClickCounts.set(key, { x, y, count: 1 });
 }
 
+function getIntensityAtPixel(x, y) {
+  const gridX = Math.floor(x / gridSize);
+  const gridY = Math.floor(y / gridSize);
+  if (gridX < 0 || gridX >= gridWidth || gridY < 0 || gridY >= gridHeight) {
+    return 0;
+  }
+  return intensityGrid[gridY][gridX];
+}
+
+function getPointMergeRadius(x, y) {
+  const intensity = getIntensityAtPixel(x, y);
+  if (intensity >= redRegionIntensityThreshold) {
+    return redRegionMergeRadius;
+  }
+  return pointLabelMergeRadius;
+}
+
 function getSummarizedPointLabels() {
   const points = Array.from(pointClickCounts.values()).sort((a, b) => b.count - a.count);
   const clusters = [];
 
   points.forEach(({ x, y, count }) => {
+    const pointMergeRadius = getPointMergeRadius(x, y);
     let closestCluster = null;
     let closestDistance = Infinity;
 
@@ -157,14 +177,15 @@ function getSummarizedPointLabels() {
       const dx = x - cluster.x;
       const dy = y - cluster.y;
       const distance = Math.sqrt(dx * dx + dy * dy);
-      if (distance <= pointLabelMergeRadius && distance < closestDistance) {
+      const mergeRadius = Math.max(pointMergeRadius, cluster.mergeRadius);
+      if (distance <= mergeRadius && distance < closestDistance) {
         closestDistance = distance;
         closestCluster = cluster;
       }
     }
 
     if (!closestCluster) {
-      clusters.push({ x, y, count });
+      clusters.push({ x, y, count, mergeRadius: pointMergeRadius });
       return;
     }
 
@@ -172,6 +193,7 @@ function getSummarizedPointLabels() {
     closestCluster.x = (closestCluster.x * closestCluster.count + x * count) / nextCount;
     closestCluster.y = (closestCluster.y * closestCluster.count + y * count) / nextCount;
     closestCluster.count = nextCount;
+    closestCluster.mergeRadius = Math.max(closestCluster.mergeRadius, pointMergeRadius);
   });
 
   return clusters;
