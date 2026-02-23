@@ -1,6 +1,6 @@
 * {
-    margin: 0px;
-    padding: 0px;
+    margin: 0;
+    padding: 0;
     box-sizing: border-box;
 }
 
@@ -10,20 +10,128 @@ body {
     align-items: center;
     justify-content: center;
     min-height: 100vh;
+    padding: 24px;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background: #f3f4f6;
+    color: #111827;
+}
+
+.main-layout {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+}
+
+.canvas-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 #heatmap-container {
     position: relative;
-    width: 800px;
-    height: 600px;
-    border: 1px solid #ccc;
+    width: fit-content;
+    height: fit-content;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #ffffff;
+    box-shadow: 0 8px 24px rgba(17, 24, 39, 0.08);
 }
 
 #heatmap-canvas {
     display: block;
 }
 
+.side-panel {
+    position: absolute;
+    left: calc(100% + 12px);
+    top: 0;
+    min-width: 110px;
+}
+
+.controls {
+    margin-top: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    width: 100%;
+}
+
+.upload-label,
 button {
-    padding: 5px;
-    margin-top: 10px;
+    padding: 7px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background: #ffffff;
+    color: #111827;
+    font: inherit;
+    line-height: 1.2;
+    cursor: pointer;
+    appearance: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.upload-label:hover {
+    background: #f9fafb;
+    border-color: #9ca3af;
+}
+
+.upload-label:focus-visible {
+    outline: 2px solid #2563eb;
+    outline-offset: 2px;
+}
+
+#photo-upload {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+button:hover {
+    background: #f9fafb;
+    border-color: #9ca3af;
+}
+
+button:focus-visible {
+    outline: 2px solid #2563eb;
+    outline-offset: 2px;
+}
+
+button:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.click-counter {
+    padding: 7px 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background: #ffffff;
+    font-size: 14px;
+    line-height: 1.2;
+}
+
+@media (max-width: 980px) {
+    .main-layout {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .side-panel {
+        position: static;
+        min-width: auto;
+    }
 }

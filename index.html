@@ -7,9 +7,23 @@
     <script src="script.js" defer></script>
 </head>
 <body>
-    <div id="heatmap-container">
-        <canvas id="heatmap-canvas"></canvas>
+    <div class="main-layout">
+        <div class="canvas-column">
+            <div id="heatmap-container">
+                <canvas id="heatmap-canvas"></canvas>
+            </div>
+            <div class="controls">
+                <label for="photo-upload" class="upload-label">Upload Photo</label>
+                <input id="photo-upload" type="file" accept="image/*">
+                <button id="clear-photo-btn" type="button" disabled>Clear Photo</button>
+                <button id="toggle-image-dim-btn" type="button">Dim Photo</button>
+                <button id="toggle-point-overlays-btn" type="button">Hide Point Labels</button>
+                <button id="reset-btn">Reset Heatmap</button>
+            </div>
+        </div>
+        <div class="side-panel">
+            <div class="click-counter">Clicks: <span id="click-count">0</span></div>
+        </div>
     </div>
-    <button id="reset-btn">Reset Heatmap</button>
 </body>
 </html>
