@@ -23,7 +23,7 @@ let intensityGrid = Array.from({ length: gridHeight }, () => Array(gridWidth).fi
 
 const maxIntensity = 20; // Cap for color scaling/Number of clicks
 const heatRadius = 16; // Radius in grid cells (pixels when gridSize=1)
-const pointLabelMergeRadius = 22; // Merge nearby point labels into one summary
+const pointLabelMergeRadius = 50; // Merge nearby point labels into one summary / Original: 22
 const dimmedImageOpacity = 0.35;
 
 const backgroundImage = new Image();
