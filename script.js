@@ -23,6 +23,10 @@ let intensityGrid = Array.from({ length: gridHeight }, () => Array(gridWidth).fi
 
 const maxIntensity = 20; // Cap for color scaling/Number of clicks
 const heatRadius = 45; // Radius in grid cells (pixels when gridSize=1)
+const heatSigmaRatio = 0.3; // Lower value keeps larger radii from over-blending
+const baseHeatRadius = 30; // Reference radius used to normalize per-click spread energy
+const baseHeatContribution = 1.35;
+const minVisibleIntensity = 0.06; // Hide faint haze from long tails
 const pointLabelMergeRadius = 22; // Merge nearby point labels into one summary / Original: 22
 const redRegionIntensityThreshold = maxIntensity * 0.72;//lower = more areas treated as red region
 const redRegionMergeRadius = 48; //Merging radius
@@ -113,13 +117,17 @@ function getColor(intensity) {
   const r = Math.floor(r1 + (r2 - r1) * localT);
   const g = Math.floor(g1 + (g2 - g1) * localT);
   const b = Math.floor(b1 + (b2 - b1) * localT);
-  const alpha = Math.min(Math.max(boosted, 0.03), 1);
+  const alpha = Math.min(boosted, 1);
   return `rgba(${r},${g},${b},${alpha})`;
 }
 
 function addHeat(x, y) {
   const gridX = Math.floor(x / gridSize);
   const gridY = Math.floor(y / gridSize);
+  const sigma = Math.max(1, heatRadius * heatSigmaRatio);
+  const radiusEnergyScale = Math.pow(baseHeatRadius / Math.max(heatRadius, 1), 0.85);
+  const heatContribution = baseHeatContribution * radiusEnergyScale;
+
   for (let dy = -heatRadius; dy <= heatRadius; dy++) {
     for (let dx = -heatRadius; dx <= heatRadius; dx++) {
       const gx = gridX + dx;
@@ -127,10 +135,9 @@ function addHeat(x, y) {
       if (gx >= 0 && gx < gridWidth && gy >= 0 && gy < gridHeight) {
         const distance = Math.sqrt(dx * dx + dy * dy);
         if (distance > heatRadius) continue;
-        // Gaussian falloff for smoother, more natural blending
-        const sigma = heatRadius / 2;
+        // Sharper Gaussian tail prevents nearby hotspots from becoming one muddy blob.
         const falloff = Math.exp(-(distance * distance) / (2 * sigma * sigma));
-        intensityGrid[gy][gx] += falloff * 1.35;
+        intensityGrid[gy][gx] += falloff * heatContribution;
       }
     }
   }
@@ -239,7 +246,7 @@ function renderHeatmap() {
   for (let gy = 0; gy < gridHeight; gy++) {
     for (let gx = 0; gx < gridWidth; gx++) {
       const intensity = intensityGrid[gy][gx];
-      if (intensity > 0) {
+      if (intensity > minVisibleIntensity) {
         ctx.fillStyle = getColor(intensity);
         ctx.fillRect(gx * gridSize, gy * gridSize, gridSize, gridSize);
       }
